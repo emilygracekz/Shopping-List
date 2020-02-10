@@ -1,12 +1,13 @@
+//grab the shopping form and list
 const shoppingForm = document.querySelector(".shopping");
 const list = document.querySelector(".list");
 
 //create an array to hold state
 let items = [];
 
+//handle when submitted
 function handleSubmit(e) {
   e.preventDefault();
-  console.log("submitted!");
   const name = e.currentTarget.item.value;
   if (!name) return;
   const item = {
@@ -14,15 +15,19 @@ function handleSubmit(e) {
     id: Date.now(),
     complete: false
   };
+  
   //push the items into state
   items.push(item);
   console.log(`There are now ${items.length} items in your state`);
+
   //clear the form
   e.target.reset();
+
   //fire custom event that tells if items are updated
   list.dispatchEvent(new CustomEvent("itemsUpdated"));
 }
 
+//display the items in the list
 function displayItems() {
   console.log(items);
   const html = items
@@ -42,11 +47,14 @@ function displayItems() {
     .join("");
   list.innerHTML = html;
 }
+
+//add items to local storage
 function mirrorToLocalStorage() {
   console.info("Saving items to localstorage");
   localStorage.setItem("items", JSON.stringify(items));
 }
 
+//access items from local storage
 function restoreFromLocalStorage() {
   const lsItems = JSON.parse(localStorage.getItem("items"));
   if (lsItems.length) {
@@ -55,13 +63,15 @@ function restoreFromLocalStorage() {
   }
 }
 
+//delete items 
 function deleteItem(id) {
   console.log("deleting", id);
-  //update items array without deleted
+  //update items array without deleted id
   items = items.filter(items => items.id !== id);
   list.dispatchEvent(new CustomEvent("itemsUpdated"));
 }
 
+//keep items marked as complete
 function markAsComplete(id) {
     console.log('marking as complete', id);
     const itemRef = items.find(items => items.id === id);
@@ -69,6 +79,7 @@ function markAsComplete(id) {
     list.dispatchEvent(new CustomEvent('itemsUpdated'));
 }
 
+//listen for submit button, display item, push item to local storage
 shoppingForm.addEventListener("submit", handleSubmit);
 list.addEventListener("itemsUpdated", displayItems);
 list.addEventListener("itemsUpdated", mirrorToLocalStorage);
@@ -84,4 +95,6 @@ list.addEventListener("click", function(e) {
       markAsComplete(id);
   }
 });
+
+//call items from local storage
 restoreFromLocalStorage();
